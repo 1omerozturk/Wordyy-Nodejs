@@ -1,8 +1,8 @@
-const express = require('express')
+require('dotenv').config()
 const connectDb = require('./config/dbConnection')
+const express =require("express")
 const path = require('path')
 const cors = require('cors')
-require('dotenv').config()
 
 // app conect to express
 const app = express()
