@@ -22,7 +22,7 @@ exports.getData = async (req, res) => {
 
 exports.getQuizData = async (req, res) => {
   try {
-    const wordies = await Wordy.find({}, { turkish: 1, english: 1 }).sort({ createdAt: -1 });
+    const wordies = await Wordy.find({}, { turkish: 1, english: 1 })
     if (wordies.length < 4) {
       return res.status(400).json({ message: "Don't find enough data " })
     }
