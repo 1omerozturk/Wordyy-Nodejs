@@ -1,6 +1,6 @@
 const connectDb = require('./config/dbConnection')
 require('dotenv').config()
-const express =require("express")
+const express = require('express')
 const path = require('path')
 const cors = require('cors')
 
@@ -17,6 +17,7 @@ app.use('/api/user', require('./routes/userRoutes'))
 app.use('/api/wordy', require('./routes/wordyRoutes'))
 app.use('/api/wordylist', require('./routes/WordyListRoutes'))
 app.use('/api/quiz', require('./routes/quizRoutes'))
+app.use('/api/translate',require('./routes/translateRoutes'))
 
 const PORT = process.env.PORT || 5050
 

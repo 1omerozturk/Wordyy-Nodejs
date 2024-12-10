@@ -33,7 +33,7 @@ exports.updateUser = async (req, res) => {
 
     // Kullanıcı bilgilerini al
     const userId = req.params.id;
-    const { email, password, name } = req.body;
+    const { email, password} = req.body;
     let filePath = req.file ? req.file.path.replace(/\\/g, '/') : null;
 
     // Kullanıcıyı kontrol et
@@ -50,7 +50,6 @@ exports.updateUser = async (req, res) => {
 
     // Kullanıcı bilgilerini güncelle
     user.email = email || user.email;
-    user.name = name || user.name;
     user.profilePicture = filePath;
 
     // Veritabanına kaydet
