@@ -27,7 +27,7 @@ exports.getQuizData = async (req, res) => {
       return res.status(400).json({ message: "Don't find enough data " })
     }
     const questions = []
-    for (let i = 0; i < Wordy.length; i++) {
+    for (let i = 0; i < wordies.length; i++) {
       const correctWord = wordies[Math.floor(Math.random() * wordies.length)]
       const wrongOptions = wordies
         .filter((w) => w._id.toString() !== correctWord._id.toString())
