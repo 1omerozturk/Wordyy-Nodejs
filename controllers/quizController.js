@@ -22,17 +22,20 @@ exports.getData = async (req, res) => {
 
 exports.getQuizData = async (req, res) => {
   try {
-    const wordies = await Wordy.find({}, { turkish: 1, english: 1 })
+    const wordies = await Wordy.find({}, { turkish: 1, english: 1 });
     if (wordies.length < 4) {
-      return res.status(400).json({ message: "Don't find enough data " })
+      return res.status(400).json({ message: "Don't find enough data" });
     }
-    const questions = []
-    for (let i = 0; i < wordies.length; i++) {
-      const correctWord = wordies[Math.floor(Math.random() * wordies.length)]
-      const wrongOptions = wordies
+
+    // Wordy'leri karıştır
+    const shuffledWordies = wordies.sort(() => 0.5 - Math.random());
+
+    const questions = [];
+    for (let i = 0; i < shuffledWordies.length; i++) {
+      const correctWord = shuffledWordies[i];
+      const wrongOptions = shuffledWordies
         .filter((w) => w._id.toString() !== correctWord._id.toString())
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3)
+        .slice(0, 3);
 
       const options = [
         {
@@ -43,20 +46,21 @@ exports.getQuizData = async (req, res) => {
           label: String.fromCharCode(98 + index),
           value: w.turkish,
         })),
-      ].sort(() => 0.5 - Math.random())
+      ].sort(() => 0.5 - Math.random());
 
       const correctAnswer = options.find(
-        (option) => option.value === correctWord.turkish,
-      ).label
+        (option) => option.value === correctWord.turkish
+      ).label;
 
       questions.push({
-        question: correctWord.english, // İngilizce kelime (soru)
-        options, // Şıklar
-        correctAnswer, // Doğru cevabın label'ı
-      })
+        question: correctWord.english,
+        options,
+        correctAnswer,
+      });
     }
-    res.json(questions)
+
+    res.json(questions);
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};

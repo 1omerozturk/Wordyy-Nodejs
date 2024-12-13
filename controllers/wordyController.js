@@ -41,6 +41,7 @@ exports.getWordysIds = async (req, res) => {
 exports.createWordy = async (req, res) => {
   try {
     const newWordy = new Wordy(req.body)
+    console.log(newWordy)
     await newWordy.save()
     return res.status(201).json(newWordy)
   } catch (error) {
@@ -67,7 +68,8 @@ exports.updateWordy = async (req, res) => {
 // Delete One Wordy By Id
 exports.deleteWordy = async (req, res) => {
   try {
-    const wordy = await Wordy.findByIdAndDelete(req.params.id)
+    const id=req.params.id
+    const wordy = await Wordy.findByIdAndDelete(id)
     if (!wordy) {
       return res.status(404).json({ error: 'Wordy not found' })
     }

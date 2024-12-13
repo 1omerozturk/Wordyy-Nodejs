@@ -1,6 +1,6 @@
 const express = require('express')
 const auth = require('../middleware/auth')
-const isAdmin = require('../middleware/admin')
+const admin = require('../middleware/admin')
 const {
   getWordies,
   getWordyById,
@@ -17,6 +17,6 @@ router.get('/:id', auth, getWordyById)
 router.post('/list', auth, getWordysIds)
 router.post('/', auth, createWordy)
 router.put('/:id', auth, updateWordy)
-router.delete('/:id', isAdmin, deleteWordy)
+router.delete('/:id', admin, deleteWordy)
 
 module.exports = router
