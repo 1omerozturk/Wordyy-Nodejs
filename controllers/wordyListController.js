@@ -1,6 +1,7 @@
 const WordyList = require('../models/wordyList')
 const User = require('../models/user')
 const Wordy = require('../models/wordy')
+const { default: mongoose } = require('mongoose')
 
 exports.getAllWordyList = async (req, res) => {
   try {
@@ -28,7 +29,6 @@ exports.createWordyList = async (req, res) => {
     const { userId } = req.params // Kullanıcı ID
     const { name, wordies } = req.body // Gelen name ve wordy ID listesi
 
-    // Eksik parametre kontrolü
     if (!name || !Array.isArray(wordies)) {
       return res.status(400).json({
         error: 'Name and wordies array are required.',
@@ -84,6 +84,23 @@ exports.getWordyListById = async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 }
+
+exports.getWordyListData = async (req, res) => {
+  try {
+    const { id } = req.params
+    const wordyList = await WordyList.findById(id)
+    if (!wordyList) {
+      return res.status(404).json({ error: 'WordyList not found' })
+    }
+    const wordyIds = wordyList.wordies.map((wordyId) => wordyId.toString())
+    const wordies = await Wordy.find({ _id: { $in: wordyIds } })
+    return res.status(200).json(wordies)
+  } catch (error) {
+    console.error('Error:', error)
+    return res.status(500).json({ error: error.message })
+  }
+}
+
 exports.deleteWordyListById = async (req, res) => {
   try {
     const { userId, wordyListId } = req.params
@@ -124,7 +141,7 @@ exports.updateWordyList = async (req, res) => {
 
 exports.addWordyWordyList = async (req, res) => {
   try {
-    const id  = req.body.wordyId;
+    const id = req.body.wordyId
     if (id !== null) {
       const wordyList = await WordyList.findById(req.params.id)
       if (!wordyList) {

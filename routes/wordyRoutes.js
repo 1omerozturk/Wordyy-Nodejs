@@ -14,7 +14,6 @@ const router = express.Router()
 
 router.get('/', auth, getWordies)
 router.get('/:id', auth, getWordyById)
-router.post('/list', auth, getWordysIds)
 router.post('/', auth, createWordy)
 router.put('/:id', auth, updateWordy)
 router.delete('/:id', admin, deleteWordy)
