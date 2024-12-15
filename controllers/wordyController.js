@@ -1,4 +1,3 @@
-const User = require('../models/user')
 const Wordy = require('../models/wordy')
 
 // Get All Wordies
@@ -19,20 +18,6 @@ exports.getWordyById = async (req, res) => {
       return res.status(404).json({ error: 'Wordy not found' })
     }
     res.json(wordy)
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
-}
-
-exports.getWordysIds = async (req, res) => {
-  const ids = req.body // Gelen ID'leri alıyoruz.
-  try {
-    if (ids.length > 0) {
-      const wordies = await Wordy.find({ _id: { $in: ids } })
-      res.json(wordies)
-    } else {
-      res.status(400).json({ message: 'ID listesi boş olamaz.' })
-    }
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
