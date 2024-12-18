@@ -6,7 +6,7 @@ const admin = require('../middleware/admin')
 
 router.post('/register', userController.registerUser)
 router.get('/users', admin, userController.getAllUsers)
-router.get('/otocreate', auth, userController.otoCreateWordy)
+router.post('/otocreate', auth, userController.otoCreateWordy)
 router.get('/:id', auth, userController.getUser)
 router.post('/login', userController.loginUser)
 router.put('/update/:id', auth, userController.updateUser)

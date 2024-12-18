@@ -122,29 +122,42 @@ exports.otoCreateWordy = async (req, res) => {
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-    const prompt =
-      "Can you provide Minimum b1 level and difficult a data (a specific english word and its turkish meaning example sentence in both languages)  in JSON format suitable for this model turkish, english, turkishExample, englishExample, type(enum: wordyTypes):wordyTypes = ['Noun - İsim', 'Verb - Fiil','Adjective - Sıfat','Adverb - Zarf', 'Pronoun - Zamir', 'Preposition - Edat','Conjunction - Bağlaç',  'Interjection - Ünlem',]"
+    const { level, difficult } = req.body
+
+    const prompt = `Can you give ${level} level ${difficult} 10 data (a specific English word and its Turkish meaning example sentence in both languages) in JSON format suitable for this model: { turkish, english, turkishExample, englishExample, type (enum: wordyTypes): wordyTypes = ['Noun - İsim', 'Verb - Fiil', 'Adjective - Sıfat', 'Adverb - Zarf', 'Pronoun - Zamir', 'Preposition - Edat', 'Conjunction - Bağlaç', 'Interjection - Ünlem'] }`
+
     const result = await model.generateContent(prompt)
 
     // Metni düzenle ve fazlalıkları temizle
-    const wordiesText = result.response
-      .text()
-      .trim()
-      .split('[')[1]
-      .split(']')[0]
+    let wordiesText = result.response.text().trim()
+    if (wordiesText.includes('[') && wordiesText.includes(']')) {
+      wordiesText = wordiesText.split('[')[1].split(']')[0]
+    } else {
+      throw new Error('Generated response is not in expected JSON format.')
+    }
+
     const correctedJson = `[${wordiesText
       .replace(/\n/g, '')
       .replace(/'/g, '"')
       .trim()}]`
 
     // JSON'u ayrıştır
-    const jsonData = JSON.parse(correctedJson)
+    let jsonData
+    try {
+      jsonData = JSON.parse(correctedJson)
+    } catch (err) {
+      console.error('JSON parse error:', err)
+      throw new Error('Failed to parse corrected JSON.')
+    }
 
     // Veritabanına kaydet
     const savedWordies = await Wordy.insertMany(jsonData)
-    res
-      .status(201)
-      .json({ message: 'Wordy entry created successfully', data: savedWordies })
+    console.log(savedWordies)
+
+    res.status(201).json({
+      message: 'Wordy entry created successfully',
+      data: savedWordies,
+    })
   } catch (error) {
     console.error(error)
     res.status(500).json({
@@ -174,15 +187,14 @@ exports.registerUser = async (req, res) => {
     console.log('User registration error.', error)
   }
 }
-exports.deleteUser=async(req,res)=>{
+exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id)
-    if(!user){
-      return res.status(404).json({error:'User not found'})
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
     res.status(200).json({ message: 'User deleted successfully' })
-  }
-  catch(error){
+  } catch (error) {
     res.status(500).json({
       message: 'An error occurred while deleting the User',
       error: error.message,

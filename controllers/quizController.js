@@ -66,38 +66,58 @@ exports.getQuizData = async (req, res) => {
   }
 }
 
+// Diziyi karıştırmak için Fisher-Yates algoritması
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]] // Elemanları yer değiştir
+  }
+  return array
+}
+
 exports.getQuizDataId = async (req, res) => {
   try {
     const { id } = req.params
+
+    // Wordy list'yi veritabanından bul
     const wordyList = await WordyList.findById(id)
     if (!wordyList) {
       return res.status(404).json({ message: 'Wordy list not found' })
     }
+
+    // Wordy IDs ve içeriklerini al
     const wordyIds = wordyList.wordies.map((wordyId) => wordyId.toString())
     const wordies = await Wordy.find({ _id: { $in: wordyIds } })
-    const shuffledWordies = wordies.sort(() => 0.5 - Math.random())
+    const allWordies=await Wordy.find({})
+
+    // Kelimeleri karıştır
+    const shuffledWordies = shuffleArray([...wordies])
+
     const questions = []
+
     for (let i = 0; i < shuffledWordies.length; i++) {
       const correctWord = shuffledWordies[i]
-      const wrongOptions = shuffledWordies
-        .filter((w) => w._id.toString() !== correctWord._id.toString())
-        .slice(0, 3)
 
-      const options = [
-        {
-          label: 'a',
-          value: correctWord.turkish,
-        },
+      const wrongOptions = shuffleArray(
+        allWordies.filter(
+          (w) => w._id.toString() !== correctWord._id.toString(),
+        ),
+      ).slice(0, 3) 
+
+      const options = shuffleArray([
+        { label: 'a', value: correctWord.turkish }, // Doğru cevap
         ...wrongOptions.map((w, index) => ({
-          label: String.fromCharCode(98 + index),
+          label: String.fromCharCode(98 + index), // b, c, d
           value: w.turkish,
         })),
-      ].sort(() => 0.5 - Math.random())
+      ])
 
+      // Doğru cevabın label'ını bul
       const correctAnswer = options.find(
         (option) => option.value === correctWord.turkish,
       ).label
 
+      // Soru oluştur ve ekle
       questions.push({
         question: correctWord.english,
         options,
@@ -105,6 +125,7 @@ exports.getQuizDataId = async (req, res) => {
       })
     }
 
+    // Oluşturulan soruları geri gönder
     res.json(questions)
   } catch (error) {
     res.status(500).json({ error: error.message })
