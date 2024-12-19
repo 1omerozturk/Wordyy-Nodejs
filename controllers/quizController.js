@@ -34,7 +34,7 @@ exports.getQuizData = async (req, res) => {
     const questions = []
     for (let i = 0; i < shuffledWordies.length; i++) {
       const correctWord = shuffledWordies[i]
-      const wrongOptions = shuffledWordies
+      const wrongOptions = wordies
         .filter((w) => w._id.toString() !== correctWord._id.toString())
         .slice(0, 3)
 
