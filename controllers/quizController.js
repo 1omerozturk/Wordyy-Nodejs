@@ -23,18 +23,19 @@ exports.getData = async (req, res) => {
 
 exports.getQuizData = async (req, res) => {
   try {
+    const allWordies=await Wordy.find({})
     const wordies = await Wordy.find({}, { turkish: 1, english: 1 })
     if (wordies.length < 4) {
       return res.status(400).json({ message: "Don't find enough data" })
     }
 
     // Wordy'leri karıştır
-    const shuffledWordies = wordies.sort(() => 0.5 - Math.random())
+    const shuffledWordies = shuffleArray([...wordies])
 
     const questions = []
     for (let i = 0; i < shuffledWordies.length; i++) {
       const correctWord = shuffledWordies[i]
-      const wrongOptions = wordies
+      const wrongOptions = allWordies
         .filter((w) => w._id.toString() !== correctWord._id.toString())
         .slice(0, 3)
 
