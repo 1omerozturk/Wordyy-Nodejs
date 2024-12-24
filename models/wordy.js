@@ -34,7 +34,7 @@ const wordySchema = new mongoose.Schema({
     required: false,
   },
   type: {
-    type: String,
+    type: [String],
     enum: wordyTypes,
     required: true,
   },

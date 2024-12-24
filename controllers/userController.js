@@ -124,7 +124,10 @@ exports.otoCreateWordy = async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     const { level, difficult } = req.body
 
-    const prompt = `Can you give ${level} level ${difficult} 10 data (a specific English word and its Turkish meaning example sentence in both languages) in JSON format suitable for this model: { turkish, english, turkishExample, englishExample, type (enum: wordyTypes): wordyTypes = ['Noun - İsim', 'Verb - Fiil', 'Adjective - Sıfat', 'Adverb - Zarf', 'Pronoun - Zamir', 'Preposition - Edat', 'Conjunction - Bağlaç', 'Interjection - Ünlem'] }`
+    console.log('level:', level)
+    console.log('difficult:', difficult)
+
+    const prompt = `Can you give ${level} level and ${difficult} difficulty 10 data (a specific English word and its Turkish meaning example sentence in both languages) in JSON format suitable for this model: { turkish, english, turkishExample, englishExample, type (enum: wordyTypes): wordyTypes = ['Noun - İsim', 'Verb - Fiil', 'Adjective - Sıfat', 'Adverb - Zarf', 'Pronoun - Zamir', 'Preposition - Edat', 'Conjunction - Bağlaç', 'Interjection - Ünlem'] }`
 
     const result = await model.generateContent(prompt)
 
@@ -136,10 +139,13 @@ exports.otoCreateWordy = async (req, res) => {
       throw new Error('Generated response is not in expected JSON format.')
     }
 
+    // Karakterleri düzelt ve çift tırnakları kullan
     const correctedJson = `[${wordiesText
       .replace(/\n/g, '')
       .replace(/'/g, '"')
       .trim()}]`
+
+    console.log('correctedJson:', correctedJson)
 
     // JSON'u ayrıştır
     let jsonData
@@ -150,8 +156,22 @@ exports.otoCreateWordy = async (req, res) => {
       throw new Error('Failed to parse corrected JSON.')
     }
 
+    const existingWordies = await Wordy.find({ english: { $in: jsonData.map(wordy => wordy.english) } })
+    .select('english')
+    .lean();
+
+    const existingWords = new Set(existingWordies.map(word => word.english));
+
+    const newWordies = jsonData.filter(wordy => !existingWords.has(wordy.english));
+    
+    if (newWordies.length === 0) {
+      return res.status(409).json({
+        message: 'No new entries to add. All English words already exist in the database.',
+      });
+    }
+
     // Veritabanına kaydet
-    const savedWordies = await Wordy.insertMany(jsonData)
+    const savedWordies = await Wordy.insertMany(newWordies)
     console.log(savedWordies)
 
     res.status(201).json({
