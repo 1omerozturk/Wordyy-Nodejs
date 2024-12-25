@@ -12,7 +12,7 @@ const {
 
 const router = express.Router()
 
-router.get('/', auth, getWordies)
+router.get('/', getWordies)
 router.get('/:id', auth, getWordyById)
 router.post('/', auth, createWordy)
 router.put('/:id', auth, updateWordy)
