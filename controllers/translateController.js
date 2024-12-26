@@ -39,6 +39,24 @@ const translate = async (lang, text) => {
   }
 }
 
+const structureText = async (text) => {
+  try {
+    if (text) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+      })
+      const prompt = `Can you give this text structure by dividing it into sentences and sentences into elements?:\n\n"${text}"`
+      const result = await await model.generateContent(prompt)
+      let structuredText = result.response.text()
+      return structuredText;
+    }
+  } catch (error) {
+    console.error(`Error in structuring text:`, error.message)
+    throw error
+  }
+}
+
 // Türkçe'den İngilizce'ye çeviri endpointi
 exports.translateTrToEn = async (req, res) => {
   const text = req.body.text
@@ -65,6 +83,20 @@ exports.translateEnToTr = async (req, res) => {
       res
         .status(500)
         .json({ error: 'Translation failed', details: error.message })
+    }
+  }
+}
+
+exports.structure = async (req, res) => {
+  const text = req.body.text
+  if (text?.length > 0) {
+    try {
+      const result = await structureText(text)
+      res.json({ structuredText: result })
+    } catch (error) {
+      res
+        .status(500)
+        .json({ error: 'Structure failed', details: error.message })
     }
   }
 }
