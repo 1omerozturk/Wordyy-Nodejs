@@ -1,1 +1,10 @@
-"# Wordyy-Nodejs" 
+# Wordyy-Nodejs
+
+- server/.env 
+```
+MONGO_URI=YOUR MONGO URL
+JWT_SECRET_KEY=YOUR SECRET KEY
+GEMINI_API_KEY=YOUR GEMINI API KEY
+PORT=5050
+
+```
